@@ -1,14 +1,20 @@
 cmake_minimum_required(VERSION 3.5)
 
+#-------------------------------------
+# Project Configuration
+#-------------------------------------
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 project(uvgrtp)
 
-option(DISABLE_CRYPTO "Do not build uvgRTP with crypto enabled")
-option(PTHREADS_PATH  "Path to POSIX threads static library")
-option(CRYPTOPP_PATH  "Path to Crypto++ static library")
+option(DISABLE_CRYPTO "Do not build uvgRTP with crypto enabled" OFF)
+include(cmake/FindDependencies.cmake)
 
+#-------------------------------------
+# Define Sources <PRIVATE>
+#-------------------------------------
 add_library(uvgrtp STATIC
     src/clock.cc
     src/crypto.cc
@@ -57,20 +63,9 @@ add_library(uvgrtp STATIC
     src/srtp/srtcp.cc
 )
 
-target_include_directories(uvgrtp
-    PUBLIC
-        ${PROJECT_SOURCE_DIR}/include
-)
-
-set(LIBRARY_PATHS "")
-
-if (PTHREADS_PATH)
-    separate_arguments(LIBRARY_PATHS NATIVE_COMMAND ${PTHREADS_PATH})
-endif (PTHREADS_PATH)
-
-if (CRYPTOPP_PATH AND NOT DISABLE_CRYPTO)
-    separate_arguments(LIBRARY_PATHS NATIVE_COMMAND "${LIBRARY_PATHS} ${CRYPTOPP_PATH}")
-endif (CRYPTOPP_PATH AND NOT DISABLE_CRYPTO)
+target_link_libraries(${PROJECT_NAME} PUBLIC Threads::Threads)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include)
 
 if (UNIX)
     set(COMPILER_FLAGS "-Wall -Wextra -Wuninitialized -Wshadow -O2 -g -march=native -DNDEBUG")
@@ -87,22 +82,10 @@ if (UNIX)
         add_compile_definitions(HAVE_GETRANDOM=1)
     endif()
 
-    # if (NOT "${LIBRARY_PATHS}" STREQUAL "")
-    #     add_custom_command(TARGET uvgrtp POST_BUILD
-    #         COMMAND ar crsT ARGS libuvgrtp_thin.a libuvgrtp.a ${LIBRARY_PATHS}
-    #         BYPRODUCTS libuvgrtp_thin.a
-    #         COMMENT "Creating combined archive"
-    #     )
-    #     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libuvgrtp_thin.a
-    #             RENAME libuvgrtp.a
-    #             DESTINATION /usr/local/lib
-    #     )
-    # else (NOT "${LIBRARY_PATHS}" STREQUAL "")
         install(TARGETS uvgrtp
                 ARCHIVE
                 DESTINATION /usr/local/lib
         )
-    # endif (NOT "${LIBRARY_PATHS}" STREQUAL "")
 
     install(DIRECTORY include/ DESTINATION /usr/local/include/uvgrtp
             FILES_MATCHING PATTERN "*.hh"
@@ -126,18 +109,10 @@ if (WIN32)
         endif(MSVC)
     endif(DISABLE_CRYPTO)
 
-    # if (NOT "${LIBRARY_PATHS}" STREQUAL "")
-    #     add_custom_command(TARGET uvgrtp POST_BUILD
-    #         COMMAND lib /out:${OUT_DIR}/uvgrtp.lib ${OUT_DIR}/uvgrtp.lib ${LIBRARY_PATHS}
-    #         BYPRODUCTS uvgrtp.lib
-    #         COMMENT "Creating combined archive"
-    #     )
-    # else (NOT "${LIBRARY_PATHS}" STREQUAL "")
         install(TARGETS uvgrtp
                 ARCHIVE
                 DESTINATION ${PROJECT_BINARY_DIR}/lib
         )
-    # endif (NOT "${LIBRARY_PATHS}" STREQUAL "")
 
     install(DIRECTORY include/ DESTINATION ${PROJECT_BINARY_DIR}/include
             FILES_MATCHING PATTERN "*.hh"
