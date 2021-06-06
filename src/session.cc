@@ -75,10 +75,7 @@ uvgrtp::media_stream *uvgrtp::session::create_stream(int r_port, int s_port, rtp
             }
 
             if (!zrtp_) {
-                if (!(zrtp_ = new uvgrtp::zrtp())) {
-                    rtp_errno = RTP_MEMORY_ERROR;
-                    return nullptr;
-                }
+                zrtp_ = new uvgrtp::zrtp();
             }
 
             if (stream->init(zrtp_) != RTP_OK) {

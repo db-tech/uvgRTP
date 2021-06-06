@@ -289,10 +289,7 @@ rtp_error_t uvgrtp::formats::h265::packet_handler(void *arg, int flags, uvgrtp::
                 + uvgrtp::frame::HEADER_SIZE_H265_NAL +
                 + ((flags & RCE_H26X_PREPEND_SC) ? 4 : 0);
 
-            if (!(complete->payload = new uint8_t[complete->payload_len])) {
-                LOG_ERROR("Failed to allocate memory for RTP frame");
-                return RTP_GENERIC_ERROR;
-            }
+            complete->payload = new uint8_t[complete->payload_len];
 
             if (flags & RCE_H26X_PREPEND_SC) {
                 complete->payload[0]  = 0;
