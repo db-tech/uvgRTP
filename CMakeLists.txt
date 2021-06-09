@@ -119,4 +119,60 @@ if (WIN32)
     )
 endif (WIN32)
 
+#-------------------------------------
+# Install
+#-------------------------------------
+# Define install target, install libraries and archives (static libraries) to "<prefix>/lib"
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        INCLUDES DESTINATION include)
+
+#Copy all header files to the <prefix>/include directory with subdirectories retained
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/${PROJECT_NAME}
+        DESTINATION include/uvgrtp
+        FILES_MATCHING PATTERN "*.h")
+include(CMakePackageConfigHelpers)
+#Create a File representing the current library version
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+        VERSION "1.0.0"
+        COMPATIBILITY SameMajorVersion
+)
+#Create a Targets file representing exported targets (uvgrtp::uvgrtp)
+export(EXPORT ${PROJECT_NAME}Targets
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Targets.cmake"
+        NAMESPACE ${PROJECT_NAME}::
+        )
+#Copy "cmake/uvgrtpConfig.cmake" to "${CMAKE_CURRENT_BINARY_DIR}/uvgrtp/uvgrtpConfig.cmake"
+configure_file(cmake/${PROJECT_NAME}Config.cmake
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Config.cmake"
+        COPYONLY
+        )
+#Copy "cmake/uvgrtpMacros.cmake" to "${CMAKE_CURRENT_BINARY_DIR}/uvgrtp/uvgrtpMacros.cmake"
+configure_file(cmake/${PROJECT_NAME}Macros.cmake
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}Macros.cmake"
+        COPYONLY
+        )
+
+# -----------------------------------------------
+#
+# -- Adding target to installing cmake package --
+#
+# -----------------------------------------------
+set(ConfigPackageLocation lib/cmake/${PROJECT_NAME})
+install(EXPORT ${PROJECT_NAME}Targets
+        FILE ${PROJECT_NAME}Targets.cmake
+        NAMESPACE ${PROJECT_NAME}::
+        DESTINATION ${ConfigPackageLocation}
+        )
+
+install(
+        FILES cmake/${PROJECT_NAME}Config.cmake cmake/${PROJECT_NAME}Macros.cmake
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}/${PROJECT_NAME}ConfigVersion.cmake"
+        DESTINATION ${ConfigPackageLocation}
+        COMPONENT Devel
+)
+
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMPILER_FLAGS}")
