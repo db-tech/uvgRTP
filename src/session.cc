@@ -50,13 +50,6 @@ uvgrtp::media_stream *uvgrtp::session::create_stream(int r_port, int s_port, rtp
     else
         stream = new uvgrtp::media_stream(addr_, laddr_, r_port, s_port, fmt, flags);
 
-    if (!stream) {
-        LOG_ERROR("Failed to create media stream for %s:%d -> %s:%d",
-            (laddr_ == "") ? "0.0.0.0" : laddr_.c_str(), s_port, addr_.c_str(), r_port
-        );
-        return nullptr;
-    }
-
     if (flags & RCE_SRTP) {
         if (!uvgrtp::crypto::enabled()) {
             LOG_ERROR("Recompile uvgRTP with -D__RTP_CRYPTO__");

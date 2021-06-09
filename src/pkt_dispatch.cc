@@ -27,8 +27,6 @@ uvgrtp::pkt_dispatcher::~pkt_dispatcher()
 rtp_error_t uvgrtp::pkt_dispatcher::start(uvgrtp::socket *socket, int flags)
 {
     runner_ = new std::thread(&uvgrtp::pkt_dispatcher::runner, this, socket, flags);
-        return RTP_MEMORY_ERROR;
-
     runner_->detach();
     return uvgrtp::runner::start();
 }
