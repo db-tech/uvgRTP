@@ -29,7 +29,7 @@ namespace uvgrtp {
                  *
                  * Return RTP_OK on success
                  * Return RTP_INVALID_VALUE if one of the parameters is invalid */
-                rtp_error_t push_media_frame(uint8_t *data, size_t data_len, int flags);
+                rtp_error_t push_media_frame(uint8_t *data, size_t data_len, int flags) override;
 
                 /* Last push_frame() on the call stack which splits the input frame ("data")
                  * into NAL units using find_h26x_start_code() and fragments the NAL unit

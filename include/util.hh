@@ -84,6 +84,7 @@ typedef enum RTP_ERROR {
  */
 typedef enum RTP_FORMAT {
     RTP_FORMAT_GENERIC = 0,   ///< Generic format
+    RTP_FORMAT_L16_1   = 11,
     RTP_FORMAT_H264    = 95,  ///< H.264/AVC
     RTP_FORMAT_H265    = 96,  ///< H.265/HEVC
     RTP_FORMAT_H266    = 97,  ///< H.266/VVC
