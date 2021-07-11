@@ -220,14 +220,17 @@ rtp_error_t uvgrtp::frame_queue::deinit_transaction(uint32_t key)
         switch (rtp_->get_payload()) {
             case RTP_FORMAT_H264:
                 delete (uvgrtp::formats::h264_headers *)transaction_it->second->media_headers;
+                transaction_it->second->media_headers = nullptr;
                 break;
 
             case RTP_FORMAT_H265:
                 delete (uvgrtp::formats::h265_headers *)transaction_it->second->media_headers;
+                transaction_it->second->media_headers = nullptr;
                 break;
 
             case RTP_FORMAT_H266:
                 delete (uvgrtp::formats::h266_headers *)transaction_it->second->media_headers;
+                transaction_it->second->media_headers = nullptr;
                 break;
 
             default:
@@ -259,8 +262,17 @@ rtp_error_t uvgrtp::frame_queue::deinit_transaction()
 
 rtp_error_t uvgrtp::frame_queue::enqueue_message(uint8_t *message, size_t message_len, bool set_marker)
 {
-    if (!message || !message_len)
-        return RTP_INVALID_VALUE;
+    if (message == nullptr)
+    {
+      LOG_ERROR("Tried to enqueue nullptr");
+      return RTP_INVALID_VALUE;
+    }
+
+    if (message_len == 0)
+    {
+      LOG_ERROR("Tried to enqueue zero length message");
+      return RTP_INVALID_VALUE;
+    }
 
     /* Create buffer vector where the full packet is constructed
      * and which is then pushed to "active_"'s pkt_vec structure */
@@ -307,7 +319,10 @@ rtp_error_t uvgrtp::frame_queue::enqueue_message(uint8_t *message, size_t messag
 rtp_error_t uvgrtp::frame_queue::enqueue_message(std::vector<std::pair<size_t, uint8_t *>>& buffers)
 {
     if (!buffers.size())
+    {
+        LOG_ERROR("Tried to enqueue an empty buffer");
         return RTP_INVALID_VALUE;
+    }
 
     /* Create buffer vector where the full packet is constructed
      * and which is then pushed to "active_"'s pkt_vec structure */
@@ -382,7 +397,7 @@ rtp_error_t uvgrtp::frame_queue::flush_queue()
         return RTP_SEND_ERROR;
     }
 
-    LOG_DEBUG("full message took %zu chunks and %zu messages", active_->chunk_ptr, active_->hdr_ptr);
+    //LOG_DEBUG("full message took %zu chunks and %zu messages", active_->chunk_ptr, active_->hdr_ptr);
     return deinit_transaction();
 }
 

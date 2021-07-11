@@ -2,15 +2,37 @@
 
 #include "media.hh"
 #include "util.hh"
+#include "socket.hh"
+
+
+
 
 namespace uvgrtp {
 
     // forward definitions
-    class socket;
     class rtp;
 
-
     namespace formats {
+
+        #define INVALID_SEQ           0x13371338
+
+
+        #define RTP_HDR_SIZE  12
+
+        enum FRAG_TYPES {
+            FT_INVALID = -2, /* invalid combination of S and E bits */
+            FT_NOT_FRAG = -1, /* frame doesn't contain fragment */
+            FT_START = 1, /* frame contains a fragment with S bit set */
+            FT_MIDDLE = 2, /* frame is fragment but not S or E fragment */
+            FT_END = 3, /* frame contains a fragment with E bit set */
+            FT_AGGR = 4  /* aggregation packet */
+        };
+
+        enum NAL_TYPES {
+            NT_INTRA = 0x00,
+            NT_INTER = 0x01,
+            NT_OTHER = 0xff
+        };
 
         class h26x : public media {
             public:
@@ -40,8 +62,34 @@ namespace uvgrtp {
                 rtp_error_t push_h26x_frame(uint8_t *data, size_t data_len, int flags);
 
             protected:
-                /* Each H26x class overrides this function with their custom NAL pushing function */
-                virtual rtp_error_t push_nal_unit(uint8_t *data, size_t data_len, bool more);
+
+                /* Gets the format specific nal type from data*/
+                virtual uint8_t get_nal_type(uint8_t* data) = 0;
+
+                /* Handles small packets. May support aggregate packets or not*/
+                virtual rtp_error_t handle_small_packet(uint8_t* data, size_t data_len, bool more) = 0;
+
+                static void prepend_start_code(int flags, uvgrtp::frame::rtp_frame** out);
+
+                // constructs format specific RTP header with correct values
+                virtual rtp_error_t construct_format_header_divide_fus(uint8_t* data, size_t& data_left,
+                    size_t& data_pos, size_t payload_size, uvgrtp::buf_vec& buffers) = 0;
+
+                /* Construct/clear aggregation packets.
+                 * Default implementation does nothing. If aggregation_pkt is supported, the 
+                 * child class should change the behavior */
+                virtual rtp_error_t make_aggregation_pkt();
+                virtual void clear_aggregation_info();
+
+                // a helper function that handles the fu division.
+                rtp_error_t divide_frame_to_fus(uint8_t* data, size_t& data_left, size_t& data_pos, size_t payload_size,
+                    uvgrtp::buf_vec& buffers, uint8_t fu_headers[]);
+
+                void initialize_fu_headers(uint8_t nal_type, uint8_t fu_headers[]);
+
+        private:
+            // constructs and sends the RTP packets with format specific stuff
+            rtp_error_t push_nal_unit(uint8_t* data, size_t data_len, bool more);
         };
     };
 };
