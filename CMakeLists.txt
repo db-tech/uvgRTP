@@ -7,16 +7,21 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(cmake/ProjectDetails.cmake)
 project(uvgrtp
-        VERSION 2.0.0)
+        VERSION ${uvgrtp_VER}
+        DESCRIPTION ${uvgrtp_DESCR}
+        HOMEPAGE_URL ${uvgrtp_URL}
+        LANGUAGES CXX)
 
+include(cmake/Versioning.cmake)
 option(DISABLE_CRYPTO "Do not build uvgRTP with crypto enabled" OFF)
 include(cmake/FindDependencies.cmake)
 
 add_library(${PROJECT_NAME} SHARED)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         SOVERSION ${CMAKE_MAJOR_VERSION}
-        VERSION ${PROJECT_VERSION}
+        VERSION ${PROJECT_VERSION}-${uvgrtp_GIT_HASH}
         )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -85,18 +90,18 @@ target_sources(${PROJECT_NAME} PRIVATE
         include/socket.hh
         )
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
-
-
-target_include_directories(${PROJECT_NAME} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+            Threads::Threads
+        PRIVATE
+            ${PROJECT_NAME}_version
         )
 
-#TODO: DO I still need EXCLUDE_FROM_ALL
-add_subdirectory(test EXCLUDE_FROM_ALL)
-
+target_include_directories(${PROJECT_NAME}
+        PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        PRIVATE $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/src>
+        PUBLIC $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
+        )
 
 if(MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /Zc:__cplusplus)
@@ -118,6 +123,7 @@ if (UNIX)
     endif()
 endif (UNIX)
 
+add_subdirectory(test)
 
 #
 # Install
@@ -127,19 +133,19 @@ include(GNUInstallDirs)
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
         LIBRARY
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            COMPONENT Runtime
+            COMPONENT ${PROJECT_NAME}_Runtime
         ARCHIVE
             DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            COMPONENT Runtime
+            COMPONENT ${PROJECT_NAME}_Runtime
         RUNTIME
             DESTINATION ${CMAKE_INSTALL_BINDIR}
-            COMPONENT Runtime)
+            COMPONENT ${PROJECT_NAME}_Runtime)
 
 #Copy all header files to the <prefix>/include/uvgrtp directory
 file(GLOB DEPLOY_FILES_AND_DIRS "${CMAKE_SOURCE_DIR}/include/*")
 install(FILES ${DEPLOY_FILES_AND_DIRS}
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/
-        COMPONENT Develop)
+        COMPONENT ${PROJECT_NAME}_Develop)
 
 #Create a File representing the current library version
 include(CMakePackageConfigHelpers)

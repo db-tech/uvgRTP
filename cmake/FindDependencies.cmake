@@ -6,6 +6,11 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package( Threads REQUIRED )
 
 #
+# Git
+#
+find_package(Git REQUIRED)
+
+#
 # GTest / GMock
 #
 include(FetchContent)
