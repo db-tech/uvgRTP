@@ -1,0 +1,16 @@
+#include "rtp_version.h"
+
+#include <cstdint>
+#include <string>
+
+namespace uvgrtp {
+std::string getUvgRTPVersion() { return "@uvgrtp_VERSION@"; }
+
+uint16_t getUvgRTPVersionMajor() { return @uvgrtp_VERSION_MAJOR@; }
+
+uint16_t getUvgRTPVersionMinor() { return @uvgrtp_VERSION_MINOR@; }
+
+uint16_t getUvgRTPVersionPatch() { return @uvgrtp_VERSION_PATCH@; }
+
+std::string getGitHash() {return "@uvgrtp_GIT_HASH@";}
+} // namespace uvgrtp
