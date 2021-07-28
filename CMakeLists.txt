@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14)
 
 #
 # Project Configuration
 #
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(cmake/ProjectDetails.cmake)
@@ -21,7 +20,7 @@ option(DISABLE_CRYPTO "Do not build uvgRTP with crypto enabled" OFF)
 add_library(${PROJECT_NAME} SHARED)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         SOVERSION ${PROJECT_VERSION_MAJOR}
-        VERSION ${PROJECT_VERSION}${uvgrtp_GIT_HASH}
+        VERSION ${LIBRARY_VERSION}
         )
 
 target_sources(${PROJECT_NAME} PRIVATE
@@ -123,7 +122,7 @@ if (UNIX)
     endif()
 endif (UNIX)
 
-add_subdirectory(test)
+add_subdirectory(test EXCLUDE_FROM_ALL)
 
 #
 # Install

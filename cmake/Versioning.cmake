@@ -14,6 +14,12 @@ if(uvgrtp_GIT_HASH)
     SET(uvgrtp_GIT_HASH "-${uvgrtp_GIT_HASH}")
 endif()
 
+if(RELEASE_VERSION)
+    set (LIBRARY_VERSION ${PROJECT_VERSION})
+else()
+    set (LIBRARY_VERSION ${PROJECT_VERSION}${uvgrtp_GIT_HASH})
+endif()
+
 configure_file(cmake/uvgrtp_version.cpp.in uvgrtp_version.cpp
         @ONLY
         )
