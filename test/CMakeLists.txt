@@ -1,6 +1,7 @@
 project(uvgrtp_test)
 
 enable_testing()
+include(GoogleTest)
 
 add_executable(${PROJECT_NAME})
 target_sources(${PROJECT_NAME}
@@ -13,3 +14,7 @@ target_link_libraries(${PROJECT_NAME}
             GTest::GTestMain
             uvgrtp
         )
+
+gtest_add_tests(
+        TARGET ${PROJECT_NAME}
+)

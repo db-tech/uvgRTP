@@ -14,6 +14,7 @@ if(uvgrtp_GIT_HASH)
     SET(uvgrtp_GIT_HASH "-${uvgrtp_GIT_HASH}")
 endif()
 
+option(RELEASE_VERSION "Create a release version" OFF)
 if(RELEASE_VERSION)
     set (LIBRARY_VERSION ${PROJECT_VERSION})
 else()

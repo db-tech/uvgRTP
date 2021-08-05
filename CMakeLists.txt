@@ -186,3 +186,10 @@ install(FILES cmake/${PROJECT_NAME}Config.cmake cmake/${PROJECT_NAME}Macros.cmak
         DESTINATION ${ConfigPackageLocation}
         COMPONENT uvgRTPMain
 )
+
+#
+# Packaging
+#
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    add_subdirectory(packaging)
+endif()
