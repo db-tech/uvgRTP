@@ -89,11 +89,15 @@ target_sources(${PROJECT_NAME} PRIVATE
         include/socket.hh
         )
 
+if(WIN32)
+    set(WINLIBS wsock32 ws2_32)
+endif()
+
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
             Threads::Threads
-        PRIVATE
             ${PROJECT_NAME}_version
+            ${WINLIBS}
         )
 
 target_include_directories(${PROJECT_NAME}
